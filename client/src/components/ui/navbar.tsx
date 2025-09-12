@@ -44,7 +44,7 @@ export default function Navbar({ onShowAuthModal }: NavbarProps) {
   ];
 
   return (
-    <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50">
+    <nav className="fixed top-0 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-border shadow-sm z-50">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center space-x-3 group">
@@ -69,10 +69,10 @@ export default function Navbar({ onShowAuthModal }: NavbarProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`transition-colors ${
+                className={`transition-colors font-medium ${
                   location === link.href
-                    ? "text-primary font-medium"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400"
                 }`}
                 data-testid={`nav-link-${link.label.toLowerCase()}`}
               >
@@ -152,10 +152,10 @@ export default function Navbar({ onShowAuthModal }: NavbarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-4 py-2 rounded-md transition-colors ${
+                  className={`px-4 py-2 rounded-md transition-colors font-medium ${
                     location === link.href
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-blue-600 text-white dark:bg-blue-500"
+                      : "text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                   data-testid={`mobile-nav-${link.label.toLowerCase()}`}
