@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Clock, MessageCircle } from "lucide-react";
+import { Mail, Clock, MessageCircle, Phone } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -45,7 +45,7 @@ export default function Contact() {
     {
       icon: <Mail className="w-6 h-6 text-white" />,
       title: "Email",
-      details: ["support@appiogenius.com", "hello@appiogenius.com"],
+      details: ["yakupsmadi@gmail.com", "Appio.Genius@gmail.com"],
       color: "bg-primary"
     },
     {
@@ -59,6 +59,12 @@ export default function Contact() {
       title: "Live Chat",
       details: ["Available 24/7 for Pro and Enterprise customers"],
       color: "bg-blue-500"
+    },
+    {
+      icon: <Phone className="w-6 h-6 text-white" />,
+      title: "WhatsApp Business",
+      details: ["+962796734144"],
+      color: "bg-green-600"
     }
   ];
 
