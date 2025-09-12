@@ -91,7 +91,7 @@ export class MemStorage implements IStorage {
       status: "generating",
       zipFilePath: null,
       description: insertProject.description || null,
-      pages: insertProject.pages || [] as Array<{title: string; description: string}>,
+      pages: insertProject.pages ?? [],
       createdAt: now,
       updatedAt: now
     };

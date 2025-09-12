@@ -49,12 +49,25 @@ export const insertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
+const pageSchema = z.object({ 
+  title: z.string(), 
+  description: z.string() 
+});
+
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   status: true,
   zipFilePath: true,
+}).extend({
+  pages: pageSchema.array().default([]),
+  firebaseIntegration: z.object({ 
+    auth: z.boolean(), 
+    firestore: z.boolean(), 
+    storage: z.boolean() 
+  }).default({ auth: false, firestore: false, storage: false }),
+  description: z.string().nullable().optional(),
 });
 
 export const insertContactMessageSchema = createInsertSchema(contactMessages).omit({
