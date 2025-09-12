@@ -25,17 +25,17 @@ export default function About() {
 
   const team = [
     {
-      name: "Alex Johnson",
+      name: "Yacoub Al-Smadi",
       role: "CEO & Founder",
+      image: "https://i.postimg.cc/zfrdSMNb/Whats-App-Image-2025-02-19-at-2-05-33-PM.jpg"
+    },
+    {
+      name: "Mohd Al-Rawashdeh", 
+      role: "CTO",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"
     },
     {
-      name: "Sarah Chen", 
-      role: "CTO",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"
-    },
-    {
-      name: "Mike Rodriguez",
+      name: "Rabie Otoum",
       role: "Lead AI Engineer", 
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"
     }
