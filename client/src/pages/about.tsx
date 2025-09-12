@@ -32,12 +32,12 @@ export default function About() {
     {
       name: "Mohd Al-Rawashdeh", 
       role: "CTO",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"
+      image: "https://i.postimg.cc/VNcwTM2S/Whats-App-Image-2025-09-12-at-19-03-04.jpg"
     },
     {
       name: "Rabie Otoum",
       role: "Lead AI Engineer", 
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"
+      image: "https://i.postimg.cc/bvHPjrjm/Whats-App-Image-2025-09-12-at-19-21-04.jpg"
     }
   ];
 
