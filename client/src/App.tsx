@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -21,11 +21,17 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     // Handle Google OAuth redirect
-    handleGoogleRedirect().catch(console.error);
-  }, []);
+    handleGoogleRedirect().then((result) => {
+      if (result && result.user) {
+        // Redirect to dashboard after successful Google sign-in
+        setTimeout(() => setLocation("/dashboard"), 100);
+      }
+    }).catch(console.error);
+  }, [setLocation]);
 
   const handleShowAuthModal = (mode: 'login' | 'signup') => {
     setAuthMode(mode);

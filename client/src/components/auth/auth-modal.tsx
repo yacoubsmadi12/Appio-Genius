@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ export default function AuthModal({ isOpen, onClose, mode, onToggleMode }: AuthM
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,14 +41,19 @@ export default function AuthModal({ isOpen, onClose, mode, onToggleMode }: AuthM
           title: "Welcome back!",
           description: "You've been successfully signed in.",
         });
+        onClose();
+        // Redirect to dashboard after successful login
+        setTimeout(() => setLocation("/dashboard"), 100);
       } else {
         await signUpWithEmail(email, password, name);
         toast({
           title: "Account created!",
           description: "Welcome to Appio Genius.",
         });
+        onClose();
+        // Redirect to dashboard after successful signup
+        setTimeout(() => setLocation("/dashboard"), 100);
       }
-      onClose();
     } catch (error: any) {
       toast({
         title: "Authentication failed",
