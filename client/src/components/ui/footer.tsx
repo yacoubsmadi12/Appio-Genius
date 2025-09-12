@@ -31,10 +31,7 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2 text-background/80">
-              <li><Link href="/" className="hover:text-background transition-colors" data-testid="footer-features">Features</Link></li>
               <li><Link href="/pricing" className="hover:text-background transition-colors" data-testid="footer-pricing">Pricing</Link></li>
-              <li><a href="#" className="hover:text-background transition-colors" data-testid="footer-docs">Documentation</a></li>
-              <li><a href="#" className="hover:text-background transition-colors" data-testid="footer-api">API Reference</a></li>
             </ul>
           </div>
           
@@ -42,8 +39,6 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-background/80">
               <li><Link href="/about" className="hover:text-background transition-colors" data-testid="footer-about">About Us</Link></li>
-              <li><a href="#" className="hover:text-background transition-colors" data-testid="footer-careers">Careers</a></li>
-              <li><a href="#" className="hover:text-background transition-colors" data-testid="footer-blog">Blog</a></li>
               <li><Link href="/contact" className="hover:text-background transition-colors" data-testid="footer-contact">Contact</Link></li>
             </ul>
           </div>
@@ -53,8 +48,6 @@ export default function Footer() {
             <ul className="space-y-2 text-background/80">
               <li><Link href="/terms" className="hover:text-background transition-colors" data-testid="footer-terms">Terms of Service</Link></li>
               <li><Link href="/privacy" className="hover:text-background transition-colors" data-testid="footer-privacy">Privacy Policy</Link></li>
-              <li><a href="#" className="hover:text-background transition-colors" data-testid="footer-cookies">Cookie Policy</a></li>
-              <li><a href="#" className="hover:text-background transition-colors" data-testid="footer-gdpr">GDPR</a></li>
             </ul>
           </div>
         </div>
