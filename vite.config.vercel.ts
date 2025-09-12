@@ -18,8 +18,8 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    // Optimize for production
-    minify: 'terser',
+    // Use default minifier (esbuild) for better compatibility
+    minify: true,
     rollupOptions: {
       output: {
         manualChunks: {
