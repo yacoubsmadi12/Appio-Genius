@@ -12,7 +12,7 @@ import {
 } from "./dropdown-menu";
 import { Avatar, AvatarFallback } from "./avatar";
 import { Menu, X } from "lucide-react";
-import logoImage from "@assets/Gemini_Generated_Image_66m9nl66m9nl66m9_1757691302263.png";
+import logoImage from "@assets/generated_images/Professional_Appio_Genius_logo_877950d7.png";
 
 interface NavbarProps {
   onShowAuthModal: (mode: 'login' | 'signup') => void;
