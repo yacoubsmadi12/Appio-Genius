@@ -11,8 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 import { Avatar, AvatarFallback } from "./avatar";
-import { Menu, X } from "lucide-react";
-import logoImage from "@assets/generated_images/Professional_Appio_Genius_logo_877950d7.png";
+import { Menu, X, Smartphone, Zap } from "lucide-react";
 
 interface NavbarProps {
   onShowAuthModal: (mode: 'login' | 'signup') => void;
@@ -48,13 +47,20 @@ export default function Navbar({ onShowAuthModal }: NavbarProps) {
     <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-2">
-            <img 
-              src={logoImage} 
-              alt="Appio Genius"
-              className="h-8 w-auto"
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <Smartphone 
+                className="h-8 w-8 text-blue-600 dark:text-blue-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300" 
+                data-testid="navbar-logo-icon"
+              />
+              <Zap className="absolute -top-1 -right-1 h-4 w-4 text-yellow-500 group-hover:text-orange-500 transition-colors duration-300" />
+            </div>
+            <span 
+              className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent group-hover:from-purple-600 group-hover:to-pink-600 dark:group-hover:from-purple-400 dark:group-hover:to-pink-400 transition-all duration-300"
               data-testid="navbar-logo"
-            />
+            >
+              Appio Genius
+            </span>
           </Link>
           
           {/* Desktop Navigation */}
