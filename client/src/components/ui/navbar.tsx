@@ -76,11 +76,6 @@ export default function Navbar({ onShowAuthModal }: NavbarProps) {
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link href="/dashboard">
-                  <Button variant="ghost" data-testid="button-dashboard">
-                    Dashboard
-                  </Button>
-                </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full" data-testid="button-user-menu">
