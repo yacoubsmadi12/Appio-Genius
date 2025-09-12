@@ -12,6 +12,7 @@ import {
 } from "./dropdown-menu";
 import { Avatar, AvatarFallback } from "./avatar";
 import { Menu, X } from "lucide-react";
+import logoImage from "@assets/Gemini_Generated_Image_66m9nl66m9nl66m9_1757691302263.png";
 
 interface NavbarProps {
   onShowAuthModal: (mode: 'login' | 'signup') => void;
@@ -48,10 +49,12 @@ export default function Navbar({ onShowAuthModal }: NavbarProps) {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">A</span>
-            </div>
-            <span className="text-xl font-bold text-foreground">Appio Genius</span>
+            <img 
+              src={logoImage} 
+              alt="Appio Genius"
+              className="h-8 w-auto"
+              data-testid="navbar-logo"
+            />
           </Link>
           
           {/* Desktop Navigation */}
