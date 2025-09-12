@@ -1,0 +1,53 @@
+Build a complete, professional website called **Appio Genius**.  
+The website should allow users to **generate fully functional Android Studio projects** based on their input.  
+Use **Next.js + TailwindCSS** for the frontend and **Node.js API routes** for backend.  
+Integrate **Firebase Authentication, Firestore Database, and Firebase Storage**.
+
+### User Flow:
+1. Users must **log in** (Firebase Auth: Email/Password + Google) before generating any apps.
+2. After login, users access a **"Generate App" dashboard** where they can:
+   - Enter **App Name**
+   - Add **Pages** with titles and descriptions (e.g., Login, Home, Profile)
+   - Write a **Prompt** describing the app features
+   - Choose to **link Firebase** for:
+     - Authentication
+     - Firestore Database
+     - Storage (for images/files)
+3. Users click **Generate App**:
+   - Backend uses **Gemini / GPT AI** to generate:
+     - Complete Android Studio project (Kotlin + Jetpack Compose or Java/XML)
+     - All pages/screens described by user
+     - Firebase integration if selected (Auth + Database + Storage)
+     - Placeholder logos/images (can be generated AI or uploaded by user)
+   - Project is packaged into **ZIP** and returned for download.
+4. Users can view/download **previously generated projects** in dashboard.
+
+### Website Pages:
+- **Home**: Hero section, features, CTA buttons, Google Ads placeholder.
+- **Pricing**: Individual (Starter/Pro) and Business (Team/Enterprise) plans. Subscription info stored in Firestore.
+- **About Us**: Mission, team/vision, attractive layout.
+- **Contact / Support**: Contact form stored in Firestore, support email displayed.
+- **Terms & Privacy**: Professional layout for legal info.
+- **Dashboard**: Only accessible after login. App generation interface with pages, prompt input, Firebase toggle, project history, Google Ads placeholders.
+
+### Design Requirements:
+- TailwindCSS, modern, clean, responsive, professional UI.
+- Gradients, backgrounds reflecting AI + Android theme.
+- Cards, modals, buttons, tables, charts as needed.
+- Navbar: Home, Pricing, About, Contact, Login/Dashboard.
+- Footer with copyright, links, and optional ad space.
+
+### Backend Requirements:
+- API routes:
+  - `/api/generate-app` → generate Android Studio project from prompt (mock AI logic, placeholder for now)
+  - `/api/contact` → store support messages in Firestore
+  - `/api/subscription` → manage subscription status
+- Ensure **authentication check** before generating apps.
+- Integrate Firebase SDK (Auth, Firestore, Storage).
+- Clean, production-ready, well-structured codebase.
+
+### Extras:
+- Include **README.md** with setup instructions.
+- Google Ads placeholders integrated elegantly in Home and Dashboard.
+- Mobile-first, attractive layout.
+- Optionally generate logos/images with AI for user projects.
