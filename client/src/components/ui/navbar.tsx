@@ -95,19 +95,19 @@ export default function Navbar({ onShowAuthModal }: NavbarProps) {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuContent className="w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg" align="end" forceMount>
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard" data-testid="dropdown-dashboard">
+                      <Link href="/dashboard" className="text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 focus:bg-slate-100 dark:focus:bg-slate-700" data-testid="dropdown-dashboard">
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/account" data-testid="dropdown-account">
+                      <Link href="/account" className="text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 focus:bg-slate-100 dark:focus:bg-slate-700" data-testid="dropdown-account">
                         Account
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} data-testid="button-logout">
+                    <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-600" />
+                    <DropdownMenuItem onClick={handleLogout} className="text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 focus:bg-slate-100 dark:focus:bg-slate-700 cursor-pointer" data-testid="button-logout">
                       Log out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -118,12 +118,14 @@ export default function Navbar({ onShowAuthModal }: NavbarProps) {
                 <Button 
                   variant="ghost" 
                   onClick={() => onShowAuthModal('login')}
+                  className="text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                   data-testid="button-login"
                 >
                   Login
                 </Button>
                 <Button 
                   onClick={() => onShowAuthModal('signup')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
                   data-testid="button-signup"
                 >
                   Get Started
