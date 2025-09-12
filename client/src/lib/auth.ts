@@ -14,11 +14,17 @@ import { apiRequest } from "./queryClient";
 const provider = new GoogleAuthProvider();
 
 export const signInWithEmail = async (email: string, password: string) => {
+  if (!auth) {
+    throw new Error("Firebase authentication is not configured");
+  }
   const result = await signInWithEmailAndPassword(auth, email, password);
   return result.user;
 };
 
 export const signUpWithEmail = async (email: string, password: string, name: string) => {
+  if (!auth) {
+    throw new Error("Firebase authentication is not configured");
+  }
   const result = await createUserWithEmailAndPassword(auth, email, password);
   
   // Create user in our database
@@ -32,10 +38,17 @@ export const signUpWithEmail = async (email: string, password: string, name: str
 };
 
 export const signInWithGoogle = () => {
+  if (!auth) {
+    throw new Error("Firebase authentication is not configured");
+  }
   signInWithRedirect(auth, provider);
 };
 
 export const handleGoogleRedirect = async () => {
+  if (!auth) {
+    console.warn("Firebase authentication is not configured");
+    return null;
+  }
   const result = await getRedirectResult(auth);
   if (result && result.user) {
     // Check if user exists in our database, if not create them
@@ -56,9 +69,23 @@ export const handleGoogleRedirect = async () => {
 };
 
 export const logout = () => {
+  if (!auth) {
+    throw new Error("Firebase authentication is not configured");
+  }
   return signOut(auth);
 };
 
 export const onAuthStateChange = (callback: (user: User | null) => void) => {
-  return onAuthStateChanged(auth, callback);
+  if (!auth) {
+    // If auth is not configured, immediately call callback with null user
+    setTimeout(() => callback(null), 0);
+    return () => {}; // Return empty unsubscribe function
+  }
+  try {
+    return onAuthStateChanged(auth, callback);
+  } catch (error) {
+    console.warn("Firebase auth state change failed:", error);
+    setTimeout(() => callback(null), 0);
+    return () => {};
+  }
 };
