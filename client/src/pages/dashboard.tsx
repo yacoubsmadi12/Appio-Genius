@@ -8,12 +8,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { onAuthStateChange } from "@/lib/auth";
 import { User } from "firebase/auth";
-import { Plus, Download, Trash2, Smartphone, History, User as UserIcon, CreditCard } from "lucide-react";
+import { Plus, Download, Trash2, Smartphone, History, User as UserIcon, CreditCard, Image, Upload, Database, Cloud, Settings } from "lucide-react";
 import ProtectedRoute from "@/components/auth/protected-route";
 import type { Project } from "@shared/schema";
 
@@ -32,11 +36,20 @@ function DashboardContent() {
     appName: "",
     pages: [{ title: "", description: "" }],
     prompt: "",
+    iconType: "ai_generated",
+    iconFile: null as File | null,
     firebaseIntegration: {
       auth: false,
       firestore: false,
-      storage: false
-    }
+      storage: false,
+      cloudFunctions: false
+    },
+    databaseIntegration: {
+      type: "none",
+      features: [] as string[]
+    },
+    includeProductImages: false,
+    productImageCount: 0
   });
   const { toast } = useToast();
 
@@ -64,7 +77,12 @@ function DashboardContent() {
         appName: "",
         pages: [{ title: "", description: "" }],
         prompt: "",
-        firebaseIntegration: { auth: false, firestore: false, storage: false }
+        iconType: "ai_generated",
+        iconFile: null,
+        firebaseIntegration: { auth: false, firestore: false, storage: false, cloudFunctions: false },
+        databaseIntegration: { type: "none", features: [] },
+        includeProductImages: false,
+        productImageCount: 0
       });
     },
     onError: (error: any) => {
@@ -99,14 +117,70 @@ function DashboardContent() {
     
     if (!appData.appName.trim() || !appData.prompt.trim()) {
       toast({
-        title: "Missing information",
-        description: "Please fill in the app name and description.",
+        title: "معلومات ناقصة",
+        description: "يرجى ملء اسم التطبيق والوصف.",
         variant: "destructive",
       });
       return;
     }
 
-    generateAppMutation.mutate(appData);
+    // Validate icon upload if selected
+    if (appData.iconType === "uploaded" && !appData.iconFile) {
+      toast({
+        title: "أيقونة مطلوبة",
+        description: "يرجى رفع ملف الأيقونة أو اختيار التوليد بالذكاء الاصطناعي.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type and size if uploading
+    if (appData.iconFile) {
+      const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      
+      if (!validTypes.includes(appData.iconFile.type)) {
+        toast({
+          title: "نوع ملف غير مدعوم",
+          description: "يرجى رفع ملف بصيغة PNG, JPG, JPEG أو WebP.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (appData.iconFile.size > maxSize) {
+        toast({
+          title: "حجم الملف كبير جداً",
+          description: "يرجى رفع ملف أصغر من 5 ميجابايت.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Prepare data for submission
+    if (appData.iconType === "uploaded" && appData.iconFile) {
+      // Use FormData for file upload
+      const formData = new FormData();
+      formData.append('appName', appData.appName);
+      formData.append('prompt', appData.prompt);
+      formData.append('pages', JSON.stringify(appData.pages));
+      formData.append('iconType', appData.iconType);
+      formData.append('iconFile', appData.iconFile);
+      formData.append('firebaseIntegration', JSON.stringify(appData.firebaseIntegration));
+      formData.append('databaseIntegration', JSON.stringify(appData.databaseIntegration));
+      formData.append('includeProductImages', appData.includeProductImages.toString());
+      formData.append('productImageCount', appData.productImageCount.toString());
+      
+      generateAppMutation.mutate(formData);
+    } else {
+      // Use regular JSON for AI-generated icon
+      const submitData = {
+        ...appData,
+        iconFile: null // Remove file object for JSON serialization
+      };
+      generateAppMutation.mutate(submitData);
+    }
   };
 
   const addPage = () => {
@@ -213,41 +287,149 @@ function DashboardContent() {
                   <CardTitle className="text-2xl font-bold">Generate New Android App</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-8">
                     {/* App Name */}
                     <div className="space-y-2">
-                      <Label htmlFor="appName">App Name</Label>
+                      <Label htmlFor="appName" className="text-lg font-semibold">اسم التطبيق</Label>
                       <Input
                         id="appName"
                         type="text"
-                        placeholder="My Awesome App"
+                        placeholder="اسم تطبيقك الرائع"
                         value={appData.appName}
                         onChange={(e) => setAppData({ ...appData, appName: e.target.value })}
                         required
                         data-testid="input-app-name"
+                        className="text-lg"
                       />
+                    </div>
+
+                    {/* App Icon Options */}
+                    <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
+                      <Label className="text-lg font-semibold flex items-center gap-2">
+                        <Image className="w-5 h-5" />
+                        أيقونة التطبيق
+                      </Label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="ai-icon"
+                            name="iconType"
+                            value="ai_generated"
+                            checked={appData.iconType === "ai_generated"}
+                            onChange={(e) => setAppData({ ...appData, iconType: e.target.value })}
+                            className="w-4 h-4"
+                          />
+                          <Label htmlFor="ai-icon" className="cursor-pointer">إنشاء أيقونة بالذكاء الاصطناعي</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="upload-icon"
+                            name="iconType"
+                            value="uploaded"
+                            checked={appData.iconType === "uploaded"}
+                            onChange={(e) => setAppData({ ...appData, iconType: e.target.value })}
+                            className="w-4 h-4"
+                          />
+                          <Label htmlFor="upload-icon" className="cursor-pointer">رفع أيقونة مخصصة</Label>
+                        </div>
+                      </div>
+                      {appData.iconType === "uploaded" && (
+                        <div className="mt-4 space-y-4">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setAppData({ ...appData, iconFile: e.target.files?.[0] || null })}
+                            className="cursor-pointer"
+                            data-testid="input-icon-upload"
+                          />
+                          {appData.iconFile && (
+                            <div className="flex items-center space-x-4 p-4 border border-border rounded-lg bg-background">
+                              <div className="w-16 h-16 border border-border rounded-lg overflow-hidden">
+                                <img
+                                  src={URL.createObjectURL(appData.iconFile)}
+                                  alt="معاينة الأيقونة"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">{appData.iconFile.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {(appData.iconFile.size / 1024 / 1024).toFixed(2)} ميجابايت
+                                </p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setAppData({ ...appData, iconFile: null })}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            يُنصح بحجم 512x512 بكسل أو أكبر لأفضل جودة (PNG, JPG, WebP - أقل من 5MB)
+                          </p>
+                        </div>
+                      )}
                     </div>
                     
                     {/* App Pages */}
-                    <div className="space-y-4">
-                      <Label>App Pages</Label>
+                    <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
+                      <Label className="text-lg font-semibold flex items-center gap-2">
+                        <Smartphone className="w-5 h-5" />
+                        صفحات التطبيق
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        أضف صفحات التطبيق مع وصف تفصيلي لكل صفحة ليتم إنشاؤها بشكل احترافي
+                      </p>
                       {appData.pages.map((page, index) => (
-                        <div key={index} className="border border-border rounded-lg p-4">
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <Input
-                              type="text"
-                              placeholder="Page Title (e.g., Home)"
-                              value={page.title}
-                              onChange={(e) => updatePage(index, 'title', e.target.value)}
-                              data-testid={`input-page-title-${index}`}
-                            />
-                            <Input
-                              type="text"
-                              placeholder="Page Description"
-                              value={page.description}
-                              onChange={(e) => updatePage(index, 'description', e.target.value)}
-                              data-testid={`input-page-description-${index}`}
-                            />
+                        <div key={index} className="border border-border rounded-lg p-4 bg-background">
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <Label className="font-medium">صفحة {index + 1}</Label>
+                              {appData.pages.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newPages = appData.pages.filter((_, i) => i !== index);
+                                    setAppData({ ...appData, pages: newPages });
+                                  }}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor={`page-title-${index}`}>عنوان الصفحة</Label>
+                                <Input
+                                  id={`page-title-${index}`}
+                                  type="text"
+                                  placeholder="مثل: الرئيسية، الملف الشخصي، الإعدادات"
+                                  value={page.title}
+                                  onChange={(e) => updatePage(index, 'title', e.target.value)}
+                                  data-testid={`input-page-title-${index}`}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor={`page-desc-${index}`}>وصف الصفحة</Label>
+                                <Textarea
+                                  id={`page-desc-${index}`}
+                                  placeholder="اكتب وصف تفصيلي لهذه الصفحة والمحتوى المطلوب فيها"
+                                  value={page.description}
+                                  onChange={(e) => updatePage(index, 'description', e.target.value)}
+                                  data-testid={`input-page-description-${index}`}
+                                  className="h-20"
+                                />
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -256,31 +438,47 @@ function DashboardContent() {
                         variant="outline" 
                         onClick={addPage}
                         data-testid="button-add-page"
+                        className="w-full"
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Add Page
+                        إضافة صفحة جديدة
                       </Button>
                     </div>
                     
                     {/* AI Prompt */}
-                    <div className="space-y-2">
-                      <Label htmlFor="prompt">Describe Your App</Label>
+                    <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
+                      <Label htmlFor="prompt" className="text-lg font-semibold flex items-center gap-2">
+                        <Settings className="w-5 h-5" />
+                        وصف التطبيق التفصيلي
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        اكتب وصفاً شاملاً لتطبيقك يتضمن الميزات، التصميم المطلوب، والوظائف الخاصة
+                      </p>
                       <Textarea
                         id="prompt"
-                        placeholder="Describe your app features, design preferences, and any specific functionality you want..."
+                        placeholder="مثال: أريد تطبيق تجارة إلكترونية يحتوي على كتالوج منتجات، سلة تسوق، نظام دفع، ملفات شخصية للمستخدمين. التصميم يجب أن يكون عصرياً باللون الأزرق والأبيض مع واجهة سهلة الاستخدام..."
                         value={appData.prompt}
                         onChange={(e) => setAppData({ ...appData, prompt: e.target.value })}
                         className="h-32"
                         required
                         data-testid="textarea-app-description"
                       />
+                      <div className="text-xs text-muted-foreground">
+                        كلما كان الوصف أكثر تفصيلاً، كان التطبيق المُولَّد أكثر دقة ومطابقة لتوقعاتك
+                      </div>
                     </div>
                     
                     {/* Firebase Integration */}
-                    <div className="space-y-4">
-                      <Label>Firebase Integration</Label>
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
+                    <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
+                      <Label className="text-lg font-semibold flex items-center gap-2">
+                        <Cloud className="w-5 h-5" />
+                        خدمات Firebase
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        اختر خدمات Firebase التي تريد دمجها في تطبيقك
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-background">
                           <Checkbox
                             id="firebase-auth"
                             checked={appData.firebaseIntegration.auth}
@@ -295,9 +493,12 @@ function DashboardContent() {
                             }
                             data-testid="checkbox-firebase-auth"
                           />
-                          <Label htmlFor="firebase-auth">Authentication (Login/Register)</Label>
+                          <div>
+                            <Label htmlFor="firebase-auth" className="font-medium">المصادقة</Label>
+                            <p className="text-xs text-muted-foreground">تسجيل الدخول والتسجيل</p>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-background">
                           <Checkbox
                             id="firebase-firestore"
                             checked={appData.firebaseIntegration.firestore}
@@ -312,9 +513,12 @@ function DashboardContent() {
                             }
                             data-testid="checkbox-firebase-firestore"
                           />
-                          <Label htmlFor="firebase-firestore">Firestore Database</Label>
+                          <div>
+                            <Label htmlFor="firebase-firestore" className="font-medium">قاعدة البيانات</Label>
+                            <p className="text-xs text-muted-foreground">Firestore Database</p>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-background">
                           <Checkbox
                             id="firebase-storage"
                             checked={appData.firebaseIntegration.storage}
@@ -329,9 +533,163 @@ function DashboardContent() {
                             }
                             data-testid="checkbox-firebase-storage"
                           />
-                          <Label htmlFor="firebase-storage">Cloud Storage</Label>
+                          <div>
+                            <Label htmlFor="firebase-storage" className="font-medium">التخزين السحابي</Label>
+                            <p className="text-xs text-muted-foreground">رفع وحفظ الملفات</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-background">
+                          <Checkbox
+                            id="firebase-functions"
+                            checked={appData.firebaseIntegration.cloudFunctions}
+                            onCheckedChange={(checked) => 
+                              setAppData({
+                                ...appData,
+                                firebaseIntegration: { 
+                                  ...appData.firebaseIntegration, 
+                                  cloudFunctions: checked as boolean 
+                                }
+                              })
+                            }
+                            data-testid="checkbox-firebase-functions"
+                          />
+                          <div>
+                            <Label htmlFor="firebase-functions" className="font-medium">دوال السحابة</Label>
+                            <p className="text-xs text-muted-foreground">معالجة البيانات في الخلفية</p>
+                          </div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Database Integration Options */}
+                    <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
+                      <Label className="text-lg font-semibold flex items-center gap-2">
+                        <Database className="w-5 h-5" />
+                        خيارات قاعدة البيانات
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        اختر نوع قاعدة البيانات والميزات المطلوبة لتطبيقك
+                      </p>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="database-type">نوع قاعدة البيانات</Label>
+                          <Select 
+                            value={appData.databaseIntegration.type} 
+                            onValueChange={(value) => 
+                              setAppData({
+                                ...appData,
+                                databaseIntegration: { ...appData.databaseIntegration, type: value }
+                              })
+                            }
+                          >
+                            <SelectTrigger data-testid="select-database-type">
+                              <SelectValue placeholder="اختر نوع قاعدة البيانات" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">بدون قاعدة بيانات</SelectItem>
+                              <SelectItem value="firebase">Firebase Firestore</SelectItem>
+                              <SelectItem value="supabase">Supabase</SelectItem>
+                              <SelectItem value="mysql">MySQL</SelectItem>
+                              <SelectItem value="postgresql">PostgreSQL</SelectItem>
+                              <SelectItem value="mongodb">MongoDB</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        {appData.databaseIntegration.type !== "none" && (
+                          <div className="space-y-3">
+                            <Label>الميزات المطلوبة</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                              {[
+                                { id: "authentication", label: "نظام المصادقة", desc: "تسجيل دخول المستخدمين" },
+                                { id: "data_storage", label: "تخزين البيانات", desc: "حفظ بيانات التطبيق" },
+                                { id: "real_time", label: "البيانات المباشرة", desc: "تحديث فوري للبيانات" },
+                                { id: "analytics", label: "التحليلات", desc: "تتبع أداء التطبيق" }
+                              ].map((feature) => (
+                                <div key={feature.id} className="flex items-start space-x-3 p-3 border border-border rounded-lg bg-background">
+                                  <Checkbox
+                                    id={`db-feature-${feature.id}`}
+                                    checked={appData.databaseIntegration.features.includes(feature.id)}
+                                    onCheckedChange={(checked) => {
+                                      const newFeatures = checked 
+                                        ? [...appData.databaseIntegration.features, feature.id]
+                                        : appData.databaseIntegration.features.filter(f => f !== feature.id);
+                                      setAppData({
+                                        ...appData,
+                                        databaseIntegration: { ...appData.databaseIntegration, features: newFeatures }
+                                      });
+                                    }}
+                                    data-testid={`checkbox-db-${feature.id}`}
+                                  />
+                                  <div>
+                                    <Label htmlFor={`db-feature-${feature.id}`} className="font-medium text-sm">
+                                      {feature.label}
+                                    </Label>
+                                    <p className="text-xs text-muted-foreground">{feature.desc}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Product Images Generation */}
+                    <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
+                      <Label className="text-lg font-semibold flex items-center gap-2">
+                        <Image className="w-5 h-5" />
+                        توليد صور المنتجات
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        هل تريد أن يولد الذكاء الاصطناعي صوراً مناسبة لمنتجات تطبيقك؟
+                      </p>
+                      <div className="flex items-center space-x-3">
+                        <Switch
+                          id="include-product-images"
+                          checked={appData.includeProductImages}
+                          onCheckedChange={(checked) => 
+                            setAppData({ 
+                              ...appData, 
+                              includeProductImages: checked,
+                              productImageCount: checked ? 5 : 0
+                            })
+                          }
+                          data-testid="switch-product-images"
+                        />
+                        <Label htmlFor="include-product-images" className="font-medium">
+                          إنشاء صور منتجات تلقائياً
+                        </Label>
+                      </div>
+                      
+                      {appData.includeProductImages && (
+                        <div className="space-y-3 mt-4 p-4 border border-border rounded-lg bg-background">
+                          <Label htmlFor="product-count">عدد الصور المطلوبة</Label>
+                          <div className="space-y-4">
+                            <Slider
+                              value={[appData.productImageCount]}
+                              onValueChange={(value) => 
+                                setAppData({ ...appData, productImageCount: value[0] })
+                              }
+                              max={20}
+                              min={1}
+                              step={1}
+                              className="w-full"
+                              data-testid="slider-product-count"
+                            />
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">1 صورة</span>
+                              <Badge variant="secondary" className="px-3 py-1">
+                                {appData.productImageCount} صورة
+                              </Badge>
+                              <span className="text-muted-foreground">20 صورة</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            سيتم إنشاء صور منتجات متنوعة ومناسبة لنوع تطبيقك
+                          </p>
+                        </div>
+                      )}
                     </div>
                     
                     <Button 
@@ -339,8 +697,19 @@ function DashboardContent() {
                       size="lg" 
                       disabled={generateAppMutation.isPending}
                       data-testid="button-generate-app"
+                      className="w-full text-lg py-6"
                     >
-                      {generateAppMutation.isPending ? "Generating..." : "Generate Android App"}
+                      {generateAppMutation.isPending ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          جاري إنشاء التطبيق...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Plus className="w-5 h-5" />
+                          إنشاء تطبيق Android احترافي
+                        </div>
+                      )}
                     </Button>
                   </form>
                 </CardContent>

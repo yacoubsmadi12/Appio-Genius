@@ -6,6 +6,24 @@ import { authenticateUser } from "./middleware/auth";
 import { generateAndroidProject } from "./services/android-generator";
 import fs from "fs";
 import path from "path";
+import multer from "multer";
+
+// Configure multer for file uploads
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+    fieldSize: 2 * 1024 * 1024  // 2MB for other fields
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PNG, JPG, JPEG and WebP are allowed.'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // User management
@@ -36,13 +54,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate new Android app
-  app.post("/api/generate-app", authenticateUser, async (req, res) => {
+  // Generate new Android app (supports both JSON and FormData)
+  app.post("/api/generate-app", authenticateUser, upload.single('iconFile'), async (req, res) => {
     try {
-      const projectData = insertProjectSchema.parse({
-        ...req.body,
-        userId: req.user!.id
-      });
+      // Parse data from either JSON or FormData
+      let projectData;
+      
+      if (req.headers['content-type']?.includes('multipart/form-data')) {
+        // Handle FormData (with file upload)
+        const { 
+          appName, 
+          prompt, 
+          pages, 
+          iconType, 
+          firebaseIntegration, 
+          databaseIntegration, 
+          includeProductImages, 
+          productImageCount 
+        } = req.body;
+        
+        projectData = {
+          userId: req.user!.id,
+          appName,
+          prompt,
+          pages: pages ? JSON.parse(pages) : [],
+          iconType: iconType || 'ai_generated',
+          iconPath: req.file ? req.file.path : null,
+          firebaseIntegration: firebaseIntegration ? JSON.parse(firebaseIntegration) : { auth: false, firestore: false, storage: false, cloudFunctions: false },
+          databaseIntegration: databaseIntegration ? JSON.parse(databaseIntegration) : { type: "none", features: [] },
+          includeProductImages: includeProductImages === 'true',
+          productImageCount: productImageCount ? parseInt(productImageCount) : 0
+        };
+      } else {
+        // Handle regular JSON
+        projectData = {
+          ...req.body,
+          userId: req.user!.id
+        };
+      }
+
+      // Validate with schema
+      const validatedData = insertProjectSchema.parse(projectData);
 
       // Check generation limits based on subscription plan
       const user = req.user!;
@@ -59,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create project record
-      const project = await storage.createProject(projectData);
+      const project = await storage.createProject(validatedData);
 
       // Start async generation process
       generateAndroidProject(project.id).catch(console.error);
@@ -71,6 +123,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(project);
     } catch (error: any) {
+      // Clean up uploaded file if there was an error
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
       res.status(400).json({ message: error.message });
     }
   });

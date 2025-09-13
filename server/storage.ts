@@ -90,8 +90,16 @@ export class MemStorage implements IStorage {
       id,
       status: "generating",
       zipFilePath: null,
+      setupGuideFilePath: null,
       description: insertProject.description || null,
       pages: insertProject.pages ?? [],
+      iconType: insertProject.iconType || "ai_generated",
+      iconPath: insertProject.iconPath || null,
+      firebaseIntegration: insertProject.firebaseIntegration || { auth: false, firestore: false, storage: false, cloudFunctions: false },
+      databaseIntegration: insertProject.databaseIntegration || { type: "none", features: [] },
+      includeProductImages: insertProject.includeProductImages || false,
+      productImageCount: insertProject.productImageCount || 0,
+      generationProgress: { currentStep: "", completedSteps: [], totalSteps: 0, progressPercentage: 0 },
       createdAt: now,
       updatedAt: now
     };

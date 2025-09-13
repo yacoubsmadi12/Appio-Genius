@@ -29,15 +29,27 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const authHeaders = await getAuthHeaders();
-  const headers = {
-    ...authHeaders,
-    ...(data ? { "Content-Type": "application/json" } : {}),
-  };
+  
+  // Handle FormData differently from JSON
+  let headers = authHeaders;
+  let body: string | FormData | undefined;
+  
+  if (data instanceof FormData) {
+    // For FormData, don't set Content-Type (let browser set multipart boundary)
+    body = data;
+  } else if (data) {
+    // For JSON data
+    headers = {
+      ...authHeaders,
+      "Content-Type": "application/json",
+    };
+    body = JSON.stringify(data);
+  }
 
   const res = await fetch(url, {
     method,
     headers,
-    body: data ? JSON.stringify(data) : undefined,
+    body,
     credentials: "include",
   });
 
