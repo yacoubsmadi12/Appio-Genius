@@ -29,76 +29,45 @@ if (!admin.apps.length) {
 
 export async function authenticateUser(req: Request, res: Response, next: NextFunction) {
   try {
-    console.log("Auth middleware called for:", req.method, req.path);
     const authHeader = req.headers.authorization;
-    console.log("Auth header:", authHeader ? "present" : "missing");
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log("No valid auth header found");
       return res.status(401).json({ message: "Authentication required" });
     }
 
     const idToken = authHeader.substring(7);
-    console.log("Token extracted, length:", idToken.length);
     
     try {
-      // Try to verify the Firebase ID token
-      console.log("Attempting Firebase Admin verification...");
       const decodedToken = await admin.auth().verifyIdToken(idToken);
       const firebaseUid = decodedToken.uid;
-      console.log("Firebase verification successful, UID:", firebaseUid);
       
-      // Get user from our database
       let user = await storage.getUserByFirebaseUid(firebaseUid);
-      console.log("User lookup result:", user ? "found" : "not found");
       
-      // If user doesn't exist, create them automatically
       if (!user) {
-        console.log("Creating user automatically from Firebase token...");
-        try {
-          user = await storage.createUser({
-            email: decodedToken.email || `${firebaseUid}@firebase.user`,
-            name: decodedToken.name || "User",
-            firebaseUid: firebaseUid,
-          });
-          console.log("User created successfully:", user.id);
-        } catch (createError) {
-          console.error("Failed to create user:", createError);
-          return res.status(401).json({ message: "Failed to create user" });
-        }
+        user = await storage.createUser({
+          email: decodedToken.email || `${firebaseUid}@firebase.user`,
+          name: decodedToken.name || "User",
+          firebaseUid: firebaseUid,
+        });
       }
 
       req.user = user;
       next();
     } catch (adminError) {
-      // If Firebase Admin verification fails, fallback to simple approach
-      console.warn("Firebase Admin verification failed, using fallback:", adminError);
-      
-      // Fallback: assume token is Firebase UID directly
       let user = await storage.getUserByFirebaseUid(idToken);
-      console.log("Fallback user lookup result:", user ? "found" : "not found");
       
-      // If user doesn't exist in fallback mode, create them
       if (!user) {
-        console.log("Creating user in fallback mode...");
-        try {
-          user = await storage.createUser({
-            email: `${idToken}@firebase.user`,
-            name: "User",
-            firebaseUid: idToken,
-          });
-          console.log("User created in fallback mode:", user.id);
-        } catch (createError) {
-          console.error("Failed to create user in fallback:", createError);
-          return res.status(401).json({ message: "Invalid authentication token" });
-        }
+        user = await storage.createUser({
+          email: `${idToken}@firebase.user`,
+          name: "User",
+          firebaseUid: idToken,
+        });
       }
 
       req.user = user;
       next();
     }
   } catch (error) {
-    console.error("Authentication error:", error);
     res.status(401).json({ message: "Authentication failed" });
   }
 }

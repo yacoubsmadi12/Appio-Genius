@@ -7,8 +7,6 @@ import { randomUUID } from "crypto";
 
 export async function generateAndroidProject(projectId: string): Promise<void> {
   try {
-    console.log(`Starting Android project generation for project ${projectId}`);
-    
     // Get project from storage
     const project = await storage.getProject(projectId);
     if (!project) {
@@ -67,10 +65,7 @@ export async function generateAndroidProject(projectId: string): Promise<void> {
     // Clean up temporary files
     fs.rmSync(tempDir, { recursive: true, force: true });
 
-    console.log(`Android project generation completed for project ${projectId}`);
   } catch (error) {
-    console.error(`Failed to generate Android project ${projectId}:`, error);
-    
     // Update project with failed status
     await storage.updateProject(projectId, { status: "failed" });
     
