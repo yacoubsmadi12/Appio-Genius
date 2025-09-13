@@ -49,11 +49,23 @@ export async function authenticateUser(req: Request, res: Response, next: NextFu
       console.log("Firebase verification successful, UID:", firebaseUid);
       
       // Get user from our database
-      const user = await storage.getUserByFirebaseUid(firebaseUid);
+      let user = await storage.getUserByFirebaseUid(firebaseUid);
       console.log("User lookup result:", user ? "found" : "not found");
       
+      // If user doesn't exist, create them automatically
       if (!user) {
-        return res.status(401).json({ message: "User not found" });
+        console.log("Creating user automatically from Firebase token...");
+        try {
+          user = await storage.createUser({
+            email: decodedToken.email || `${firebaseUid}@firebase.user`,
+            name: decodedToken.name || "User",
+            firebaseUid: firebaseUid,
+          });
+          console.log("User created successfully:", user.id);
+        } catch (createError) {
+          console.error("Failed to create user:", createError);
+          return res.status(401).json({ message: "Failed to create user" });
+        }
       }
 
       req.user = user;
@@ -63,11 +75,23 @@ export async function authenticateUser(req: Request, res: Response, next: NextFu
       console.warn("Firebase Admin verification failed, using fallback:", adminError);
       
       // Fallback: assume token is Firebase UID directly
-      const user = await storage.getUserByFirebaseUid(idToken);
+      let user = await storage.getUserByFirebaseUid(idToken);
       console.log("Fallback user lookup result:", user ? "found" : "not found");
       
+      // If user doesn't exist in fallback mode, create them
       if (!user) {
-        return res.status(401).json({ message: "Invalid authentication token" });
+        console.log("Creating user in fallback mode...");
+        try {
+          user = await storage.createUser({
+            email: `${idToken}@firebase.user`,
+            name: "User",
+            firebaseUid: idToken,
+          });
+          console.log("User created in fallback mode:", user.id);
+        } catch (createError) {
+          console.error("Failed to create user in fallback:", createError);
+          return res.status(401).json({ message: "Invalid authentication token" });
+        }
       }
 
       req.user = user;
