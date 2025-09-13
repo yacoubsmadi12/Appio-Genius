@@ -117,8 +117,8 @@ function DashboardContent() {
     
     if (!appData.appName.trim() || !appData.prompt.trim()) {
       toast({
-        title: "معلومات ناقصة",
-        description: "يرجى ملء اسم التطبيق والوصف.",
+        title: "Missing Information",
+        description: "Please fill in the app name and description.",
         variant: "destructive",
       });
       return;
@@ -127,8 +127,8 @@ function DashboardContent() {
     // Validate icon upload if selected
     if (appData.iconType === "uploaded" && !appData.iconFile) {
       toast({
-        title: "أيقونة مطلوبة",
-        description: "يرجى رفع ملف الأيقونة أو اختيار التوليد بالذكاء الاصطناعي.",
+        title: "Icon Required",
+        description: "Please upload an icon file or choose AI generation.",
         variant: "destructive",
       });
       return;
@@ -141,8 +141,8 @@ function DashboardContent() {
       
       if (!validTypes.includes(appData.iconFile.type)) {
         toast({
-          title: "نوع ملف غير مدعوم",
-          description: "يرجى رفع ملف بصيغة PNG, JPG, JPEG أو WebP.",
+          title: "Unsupported File Type",
+          description: "Please upload a PNG, JPG, JPEG or WebP file.",
           variant: "destructive",
         });
         return;
@@ -150,8 +150,8 @@ function DashboardContent() {
       
       if (appData.iconFile.size > maxSize) {
         toast({
-          title: "حجم الملف كبير جداً",
-          description: "يرجى رفع ملف أصغر من 5 ميجابايت.",
+          title: "File Too Large",
+          description: "Please upload a file smaller than 5MB.",
           variant: "destructive",
         });
         return;
@@ -290,11 +290,11 @@ function DashboardContent() {
                   <form onSubmit={handleSubmit} className="space-y-8">
                     {/* App Name */}
                     <div className="space-y-2">
-                      <Label htmlFor="appName" className="text-lg font-semibold">اسم التطبيق</Label>
+                      <Label htmlFor="appName" className="text-lg font-semibold">App Name</Label>
                       <Input
                         id="appName"
                         type="text"
-                        placeholder="اسم تطبيقك الرائع"
+                        placeholder="Your Amazing App Name"
                         value={appData.appName}
                         onChange={(e) => setAppData({ ...appData, appName: e.target.value })}
                         required
@@ -307,7 +307,7 @@ function DashboardContent() {
                     <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
                       <Label className="text-lg font-semibold flex items-center gap-2">
                         <Image className="w-5 h-5" />
-                        أيقونة التطبيق
+                        App Icon
                       </Label>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="flex items-center space-x-2">
@@ -320,7 +320,7 @@ function DashboardContent() {
                             onChange={(e) => setAppData({ ...appData, iconType: e.target.value })}
                             className="w-4 h-4"
                           />
-                          <Label htmlFor="ai-icon" className="cursor-pointer">إنشاء أيقونة بالذكاء الاصطناعي</Label>
+                          <Label htmlFor="ai-icon" className="cursor-pointer">Generate AI Icon</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <input
@@ -332,7 +332,7 @@ function DashboardContent() {
                             onChange={(e) => setAppData({ ...appData, iconType: e.target.value })}
                             className="w-4 h-4"
                           />
-                          <Label htmlFor="upload-icon" className="cursor-pointer">رفع أيقونة مخصصة</Label>
+                          <Label htmlFor="upload-icon" className="cursor-pointer">Upload Custom Icon</Label>
                         </div>
                       </div>
                       {appData.iconType === "uploaded" && (
@@ -349,14 +349,14 @@ function DashboardContent() {
                               <div className="w-16 h-16 border border-border rounded-lg overflow-hidden">
                                 <img
                                   src={URL.createObjectURL(appData.iconFile)}
-                                  alt="معاينة الأيقونة"
+                                  alt="Icon Preview"
                                   className="w-full h-full object-cover"
                                 />
                               </div>
                               <div className="flex-1">
                                 <p className="font-medium text-sm">{appData.iconFile.name}</p>
                                 <p className="text-xs text-muted-foreground">
-                                  {(appData.iconFile.size / 1024 / 1024).toFixed(2)} ميجابايت
+                                  {(appData.iconFile.size / 1024 / 1024).toFixed(2)} MB
                                 </p>
                               </div>
                               <Button
@@ -371,7 +371,7 @@ function DashboardContent() {
                             </div>
                           )}
                           <p className="text-sm text-muted-foreground">
-                            يُنصح بحجم 512x512 بكسل أو أكبر لأفضل جودة (PNG, JPG, WebP - أقل من 5MB)
+                            Recommended size: 512x512 pixels or larger for best quality (PNG, JPG, WebP - under 5MB)
                           </p>
                         </div>
                       )}
@@ -381,16 +381,16 @@ function DashboardContent() {
                     <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
                       <Label className="text-lg font-semibold flex items-center gap-2">
                         <Smartphone className="w-5 h-5" />
-                        صفحات التطبيق
+                        App Pages
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        أضف صفحات التطبيق مع وصف تفصيلي لكل صفحة ليتم إنشاؤها بشكل احترافي
+                        Add app pages with detailed descriptions for each page to be created professionally
                       </p>
                       {appData.pages.map((page, index) => (
                         <div key={index} className="border border-border rounded-lg p-4 bg-background">
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <Label className="font-medium">صفحة {index + 1}</Label>
+                              <Label className="font-medium">Page {index + 1}</Label>
                               {appData.pages.length > 1 && (
                                 <Button
                                   type="button"
@@ -408,21 +408,21 @@ function DashboardContent() {
                             </div>
                             <div className="grid md:grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                <Label htmlFor={`page-title-${index}`}>عنوان الصفحة</Label>
+                                <Label htmlFor={`page-title-${index}`}>Page Title</Label>
                                 <Input
                                   id={`page-title-${index}`}
                                   type="text"
-                                  placeholder="مثل: الرئيسية، الملف الشخصي، الإعدادات"
+                                  placeholder="e.g: Home, Profile, Settings"
                                   value={page.title}
                                   onChange={(e) => updatePage(index, 'title', e.target.value)}
                                   data-testid={`input-page-title-${index}`}
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor={`page-desc-${index}`}>وصف الصفحة</Label>
+                                <Label htmlFor={`page-desc-${index}`}>Page Description</Label>
                                 <Textarea
                                   id={`page-desc-${index}`}
-                                  placeholder="اكتب وصف تفصيلي لهذه الصفحة والمحتوى المطلوب فيها"
+                                  placeholder="Write a detailed description of this page and its required content"
                                   value={page.description}
                                   onChange={(e) => updatePage(index, 'description', e.target.value)}
                                   data-testid={`input-page-description-${index}`}
@@ -441,7 +441,7 @@ function DashboardContent() {
                         className="w-full"
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        إضافة صفحة جديدة
+                        Add New Page
                       </Button>
                     </div>
                     
@@ -449,14 +449,14 @@ function DashboardContent() {
                     <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
                       <Label htmlFor="prompt" className="text-lg font-semibold flex items-center gap-2">
                         <Settings className="w-5 h-5" />
-                        وصف التطبيق التفصيلي
+                        Detailed App Description
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        اكتب وصفاً شاملاً لتطبيقك يتضمن الميزات، التصميم المطلوب، والوظائف الخاصة
+                        Write a comprehensive description of your app including features, desired design, and special functions
                       </p>
                       <Textarea
                         id="prompt"
-                        placeholder="مثال: أريد تطبيق تجارة إلكترونية يحتوي على كتالوج منتجات، سلة تسوق، نظام دفع، ملفات شخصية للمستخدمين. التصميم يجب أن يكون عصرياً باللون الأزرق والأبيض مع واجهة سهلة الاستخدام..."
+                        placeholder="Example: I want an e-commerce app with product catalog, shopping cart, payment system, user profiles. The design should be modern with blue and white colors and an easy-to-use interface..."
                         value={appData.prompt}
                         onChange={(e) => setAppData({ ...appData, prompt: e.target.value })}
                         className="h-32"
@@ -464,7 +464,7 @@ function DashboardContent() {
                         data-testid="textarea-app-description"
                       />
                       <div className="text-xs text-muted-foreground">
-                        كلما كان الوصف أكثر تفصيلاً، كان التطبيق المُولَّد أكثر دقة ومطابقة لتوقعاتك
+                        The more detailed the description, the more accurate and matching your expectations the generated app will be
                       </div>
                     </div>
                     
@@ -472,10 +472,10 @@ function DashboardContent() {
                     <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
                       <Label className="text-lg font-semibold flex items-center gap-2">
                         <Cloud className="w-5 h-5" />
-                        خدمات Firebase
+                        Firebase Services
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        اختر خدمات Firebase التي تريد دمجها في تطبيقك
+                        Choose Firebase services you want to integrate into your app
                       </p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-background">
@@ -494,8 +494,8 @@ function DashboardContent() {
                             data-testid="checkbox-firebase-auth"
                           />
                           <div>
-                            <Label htmlFor="firebase-auth" className="font-medium">المصادقة</Label>
-                            <p className="text-xs text-muted-foreground">تسجيل الدخول والتسجيل</p>
+                            <Label htmlFor="firebase-auth" className="font-medium">Authentication</Label>
+                            <p className="text-xs text-muted-foreground">Login and registration</p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-background">
@@ -514,7 +514,7 @@ function DashboardContent() {
                             data-testid="checkbox-firebase-firestore"
                           />
                           <div>
-                            <Label htmlFor="firebase-firestore" className="font-medium">قاعدة البيانات</Label>
+                            <Label htmlFor="firebase-firestore" className="font-medium">Database</Label>
                             <p className="text-xs text-muted-foreground">Firestore Database</p>
                           </div>
                         </div>
@@ -534,8 +534,8 @@ function DashboardContent() {
                             data-testid="checkbox-firebase-storage"
                           />
                           <div>
-                            <Label htmlFor="firebase-storage" className="font-medium">التخزين السحابي</Label>
-                            <p className="text-xs text-muted-foreground">رفع وحفظ الملفات</p>
+                            <Label htmlFor="firebase-storage" className="font-medium">Cloud Storage</Label>
+                            <p className="text-xs text-muted-foreground">Upload and save files</p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-background">
@@ -554,8 +554,8 @@ function DashboardContent() {
                             data-testid="checkbox-firebase-functions"
                           />
                           <div>
-                            <Label htmlFor="firebase-functions" className="font-medium">دوال السحابة</Label>
-                            <p className="text-xs text-muted-foreground">معالجة البيانات في الخلفية</p>
+                            <Label htmlFor="firebase-functions" className="font-medium">Cloud Functions</Label>
+                            <p className="text-xs text-muted-foreground">Background data processing</p>
                           </div>
                         </div>
                       </div>
@@ -565,14 +565,14 @@ function DashboardContent() {
                     <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
                       <Label className="text-lg font-semibold flex items-center gap-2">
                         <Database className="w-5 h-5" />
-                        خيارات قاعدة البيانات
+                        Database Options
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        اختر نوع قاعدة البيانات والميزات المطلوبة لتطبيقك
+                        Choose the database type and required features for your app
                       </p>
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="database-type">نوع قاعدة البيانات</Label>
+                          <Label htmlFor="database-type">Database Type</Label>
                           <Select 
                             value={appData.databaseIntegration.type} 
                             onValueChange={(value) => 
@@ -583,10 +583,10 @@ function DashboardContent() {
                             }
                           >
                             <SelectTrigger data-testid="select-database-type">
-                              <SelectValue placeholder="اختر نوع قاعدة البيانات" />
+                              <SelectValue placeholder="Choose database type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="none">بدون قاعدة بيانات</SelectItem>
+                              <SelectItem value="none">No Database</SelectItem>
                               <SelectItem value="firebase">Firebase Firestore</SelectItem>
                               <SelectItem value="supabase">Supabase</SelectItem>
                               <SelectItem value="mysql">MySQL</SelectItem>
@@ -598,13 +598,13 @@ function DashboardContent() {
                         
                         {appData.databaseIntegration.type !== "none" && (
                           <div className="space-y-3">
-                            <Label>الميزات المطلوبة</Label>
+                            <Label>Required Features</Label>
                             <div className="grid grid-cols-2 gap-3">
                               {[
-                                { id: "authentication", label: "نظام المصادقة", desc: "تسجيل دخول المستخدمين" },
-                                { id: "data_storage", label: "تخزين البيانات", desc: "حفظ بيانات التطبيق" },
-                                { id: "real_time", label: "البيانات المباشرة", desc: "تحديث فوري للبيانات" },
-                                { id: "analytics", label: "التحليلات", desc: "تتبع أداء التطبيق" }
+                                { id: "authentication", label: "Authentication System", desc: "User login system" },
+                                { id: "data_storage", label: "Data Storage", desc: "Save app data" },
+                                { id: "real_time", label: "Real-time Data", desc: "Instant data updates" },
+                                { id: "analytics", label: "Analytics", desc: "Track app performance" }
                               ].map((feature) => (
                                 <div key={feature.id} className="flex items-start space-x-3 p-3 border border-border rounded-lg bg-background">
                                   <Checkbox
@@ -639,10 +639,10 @@ function DashboardContent() {
                     <div className="space-y-4 p-6 border border-border rounded-lg bg-muted/20">
                       <Label className="text-lg font-semibold flex items-center gap-2">
                         <Image className="w-5 h-5" />
-                        توليد صور المنتجات
+                        Product Images Generation
                       </Label>
                       <p className="text-sm text-muted-foreground">
-                        هل تريد أن يولد الذكاء الاصطناعي صوراً مناسبة لمنتجات تطبيقك؟
+                        Do you want AI to generate suitable images for your app's products?
                       </p>
                       <div className="flex items-center space-x-3">
                         <Switch
@@ -658,13 +658,13 @@ function DashboardContent() {
                           data-testid="switch-product-images"
                         />
                         <Label htmlFor="include-product-images" className="font-medium">
-                          إنشاء صور منتجات تلقائياً
+                          Generate product images automatically
                         </Label>
                       </div>
                       
                       {appData.includeProductImages && (
                         <div className="space-y-3 mt-4 p-4 border border-border rounded-lg bg-background">
-                          <Label htmlFor="product-count">عدد الصور المطلوبة</Label>
+                          <Label htmlFor="product-count">Number of Images Required</Label>
                           <div className="space-y-4">
                             <Slider
                               value={[appData.productImageCount]}
@@ -678,15 +678,15 @@ function DashboardContent() {
                               data-testid="slider-product-count"
                             />
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">1 صورة</span>
+                              <span className="text-muted-foreground">1 image</span>
                               <Badge variant="secondary" className="px-3 py-1">
-                                {appData.productImageCount} صورة
+                                {appData.productImageCount} images
                               </Badge>
-                              <span className="text-muted-foreground">20 صورة</span>
+                              <span className="text-muted-foreground">20 images</span>
                             </div>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            سيتم إنشاء صور منتجات متنوعة ومناسبة لنوع تطبيقك
+                            Various and suitable product images will be generated for your app type
                           </p>
                         </div>
                       )}
@@ -702,12 +702,12 @@ function DashboardContent() {
                       {generateAppMutation.isPending ? (
                         <div className="flex items-center gap-2">
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          جاري إنشاء التطبيق...
+                          Generating app...
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
                           <Plus className="w-5 h-5" />
-                          إنشاء تطبيق Android احترافي
+                          Generate Professional Android App
                         </div>
                       )}
                     </Button>
