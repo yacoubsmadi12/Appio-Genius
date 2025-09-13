@@ -16,6 +16,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { onAuthStateChange } from "@/lib/auth";
+import { auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
 import { Plus, Download, Trash2, Smartphone, History, User as UserIcon, CreditCard, Image, Upload, Database, Cloud, Settings } from "lucide-react";
 import ProtectedRoute from "@/components/auth/protected-route";
@@ -198,12 +199,25 @@ function DashboardContent() {
 
   const downloadProject = async (projectId: string) => {
     try {
+      // Get Firebase auth token manually for binary download
+      const headers: Record<string, string> = {};
+      if (auth && auth.currentUser) {
+        try {
+          const token = await auth.currentUser.getIdToken();
+          headers["Authorization"] = `Bearer ${token}`;
+        } catch (error) {
+          console.warn("Failed to get Firebase ID token:", error);
+        }
+      }
+
       const response = await fetch(`/api/projects/${projectId}/download`, {
+        headers,
         credentials: 'include'
       });
       
       if (!response.ok) {
-        throw new Error('Download failed');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Download failed');
       }
 
       const blob = await response.blob();
