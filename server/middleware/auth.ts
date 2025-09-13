@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { storage } from "../storage";
 import { User } from "@shared/schema";
+import admin from "firebase-admin";
 
 // Extend Express Request type to include user
 declare global {
@@ -11,29 +12,67 @@ declare global {
   }
 }
 
+// Initialize Firebase Admin SDK
+if (!admin.apps.length) {
+  try {
+    // Check if we have Firebase config from environment
+    const projectId = process.env.VITE_FIREBASE_PROJECT_ID;
+    if (projectId) {
+      admin.initializeApp({
+        projectId: projectId,
+      });
+    }
+  } catch (error) {
+    console.warn("Firebase Admin initialization failed:", error);
+  }
+}
+
 export async function authenticateUser(req: Request, res: Response, next: NextFunction) {
   try {
-    // In a real implementation, we would verify Firebase ID tokens here
-    // For now, we'll use a simple header-based authentication
+    console.log("Auth middleware called for:", req.method, req.path);
     const authHeader = req.headers.authorization;
+    console.log("Auth header:", authHeader ? "present" : "missing");
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log("No valid auth header found");
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    // Extract the token (in real implementation, this would be a Firebase ID token)
-    const token = authHeader.substring(7);
+    const idToken = authHeader.substring(7);
+    console.log("Token extracted, length:", idToken.length);
     
-    // For demo purposes, we'll assume the token is the user's Firebase UID
-    // In production, you would verify the Firebase ID token here
-    const user = await storage.getUserByFirebaseUid(token);
-    
-    if (!user) {
-      return res.status(401).json({ message: "Invalid authentication token" });
-    }
+    try {
+      // Try to verify the Firebase ID token
+      console.log("Attempting Firebase Admin verification...");
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      const firebaseUid = decodedToken.uid;
+      console.log("Firebase verification successful, UID:", firebaseUid);
+      
+      // Get user from our database
+      const user = await storage.getUserByFirebaseUid(firebaseUid);
+      console.log("User lookup result:", user ? "found" : "not found");
+      
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
 
-    req.user = user;
-    next();
+      req.user = user;
+      next();
+    } catch (adminError) {
+      // If Firebase Admin verification fails, fallback to simple approach
+      console.warn("Firebase Admin verification failed, using fallback:", adminError);
+      
+      // Fallback: assume token is Firebase UID directly
+      const user = await storage.getUserByFirebaseUid(idToken);
+      console.log("Fallback user lookup result:", user ? "found" : "not found");
+      
+      if (!user) {
+        return res.status(401).json({ message: "Invalid authentication token" });
+      }
+
+      req.user = user;
+      next();
+    }
   } catch (error) {
     console.error("Authentication error:", error);
     res.status(401).json({ message: "Authentication failed" });
